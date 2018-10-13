@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
-
+import { Link, withRouter } from 'react-router-dom';
+import { auth } from '../firebase';
 import * as routes from '../constants/routes';
 
-const SignUpPage = () =>
+const SignUpPage = ({ history }) =>
   <div>
     <h1>SignUp</h1>
-    <SignUpForm />
+    <SignUpForm history={history} />
   </div>
 
 const INITIAL_STATE = {
@@ -27,9 +27,30 @@ class SignUpForm extends Component {
 
     this.state = { ...INITIAL_STATE };
   }
-
+  // onSubmit() class method which will pass all the form data
+  // to the Firebase authentication API via your previously set 
+  // authentication interface in the firebase folder
   onSubmit = (event) => {
+    const {
+      username,
+      email,
+      passwordOne,
+    } = this.state;
 
+    const {
+      history,
+    } = this.props;
+
+    auth.doCreateUserWithEmailAndPassword(email, passwordOne)
+      .then(authUser => {
+        this.setState({ ...INITIAL_STATE });
+        history.push(routes.HOME);
+      })
+      .catch(error => {
+        this.setState(byPropKey('error', error));
+      })
+
+    event.preventDefault();
   }
 
   render() {
@@ -91,7 +112,7 @@ const SignUpLink = () =>
     <Link to={routes.SIGN_UP}>Sign Up</Link>
   </p>
 
-export default SignUpPage;
+export default withRouter(SignUpPage);
 
 export {
   SignUpForm,
